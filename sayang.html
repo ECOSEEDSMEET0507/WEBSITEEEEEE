@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Birthday Surprise</title>
+<style>
+body {
+  margin:0;
+  font-family:'Poppins',sans-serif;
+  background: linear-gradient(135deg,#ff9a9e,#fad0c4);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+  overflow:hidden;
+}
+.page { position:absolute; width:100%; height:100%; display:none; justify-content:center; align-items:center; flex-direction:column; transition:0.5s; }
+.page.active { display:flex; }
+
+/* SURAT */
+.envelope { width:220px; height:150px; background:#ffb3c6; border-radius:15px; position:relative; cursor:pointer; box-shadow:0 10px 25px rgba(0,0,0,0.25); transition:0.3s; }
+.envelope:hover{ transform: scale(1.05); }
+.flap{ position:absolute; top:0; left:0; width:100%; height:100%; background:#ff8fab; clip-path: polygon(0 0,50% 60%,100% 0,100% 0,0 0); border-radius:15px 15px 0 0; transition:0.5s; }
+.heart{ position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:32px; }
+.note{ position:absolute; bottom:20px; left:50%; transform:translateX(-50%) scale(0); width:330px; background:white; padding:20px; border-radius:18px; box-shadow:0 15px 30px rgba(0,0,0,0.25); text-align:center; transition:0.5s; }
+.wrapper.open .note{ transform:translateX(-50%) scale(1); }
+.wrapper.open .flap{ transform: rotateX(180deg); transform-origin:top; }
+.note h2{ color:#ff4d6d; }
+.note p{ color:#444; font-size:15px; line-height:1.6; }
+.btn-next{ margin-top:15px; padding:10px 25px; border:none; border-radius:20px; background:#ff4d6d; color:white; font-size:14px; cursor:pointer; }
+.btn-next:hover{ background:#e63950; }
+
+/* BALLOON */
+.balloon{ position:absolute; width:50px; height:65px; border-radius:50%; cursor:pointer; animation:float 6s linear forwards; }
+.balloon::after{ content:""; position:absolute; bottom:-20px; left:50%; width:2px; height:20px; background:#555; }
+@keyframes float{ from{transform:translateY(0);opacity:1;} to{transform:translateY(-700px);opacity:0.8;} }
+.pop{ animation: explode 0.3s forwards; }
+@keyframes explode{ 0%{ transform:scale(1);opacity:1;} 100%{transform:scale(2);opacity:0;} }
+
+/* CAKE */
+.cake-box{ position:relative; text-align:center; cursor:pointer; }
+.cake-shadow{ width:260px; height:25px; background:rgba(0,0,0,0.2); border-radius:50%; margin:auto; filter:blur(6px); }
+.cake{ width:260px; height:140px; background:linear-gradient(180deg,#ffb3c6,#ff8fab); border-radius:20px; position:relative; box-shadow: inset 0 -10px 0 rgba(0,0,0,0.1),0 15px 25px rgba(0,0,0,0.3);}
+.cake-top{ position:absolute; top:-30px; left:0; width:100%; height:50px; background:linear-gradient(180deg,#fff0f3,#ffccd5); border-radius:20px 20px 10px 10px; box-shadow: inset 0 -5px 0 rgba(0,0,0,0.1); }
+.drip{ position:absolute; width:18px; height:35px; background:#ffccd5; border-radius:0 0 10px 10px; top:20px; }
+.drip:nth-child(1){ left:40px; }
+.drip:nth-child(2){ left:110px; height:45px; }
+.drip:nth-child(3){ left:190px; }
+.number-candle{ position:absolute; top:-65px; left:50%; transform:translateX(-50%); display:flex; gap:15px; }
+.num{ font-size:48px; font-weight:bold; color:white; background:linear-gradient(180deg,#ff4d6d,#ff9f1c); padding:6px 10px; border-radius:8px; position:relative; box-shadow:0 5px 10px rgba(0,0,0,0.3); }
+.num::before{ content:""; position:absolute; top:-12px; left:50%; transform:translateX(-50%); width:10px; height:10px; background:radial-gradient(circle,yellow,orange); border-radius:50%; animation: flame 0.7s infinite alternate; }
+@keyframes flame{ from{ transform:translateX(-50%) scale(1); opacity:1;} to{transform:translateX(-50%) scale(1.4); opacity:0.6;} }
+
+/* GALLERY */
+#page4{ background:linear-gradient(135deg,#fce4ec,#ffe0f0); flex-direction:column; padding:20px;}
+.gallery{ display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:20px; width:90%; max-width:1000px; justify-items:center; align-items:center; margin-top:10px; }
+.gallery img{ width:100%; border-radius:20px; box-shadow:0 10px 20px rgba(0,0,0,0.15); transition:0.3s; cursor:pointer; }
+.gallery img:hover{ transform:scale(1.1); box-shadow:0 15px 30px rgba(0,0,0,0.25);}
+#page4 h2{ color:#ff4d6d; font-size:32px; font-weight:700; text-shadow:1px 1px 3px rgba(0,0,0,0.2); }
+
+/* PAGE HADIAH */
+#page5{ background: linear-gradient(135deg,#ffd6e8,#ffb3c6); flex-direction:column; padding:30px; }
+#page5 h2{ color:#ff4d6d; font-size:28px; text-align:center; margin-bottom:20px; }
+#page5 .btn-gift{ margin:10px; padding:10px 25px; font-size:16px; border:none; border-radius:20px; cursor:pointer; color:white; background:#ff4d6d; transition:0.3s; }
+#page5 .btn-gift:hover{ background:#e63950; }
+
+/* EMOJI SAD */
+#sadEmojiContainer{ display:none; text-align:center; margin-top:20px; }
+#sadEmoji{ font-size:80px; animation:sadBounce 0.7s ease infinite alternate; }
+#sadText{ color:#ff4d6d; font-size:20px; margin-top:10px; }
+@keyframes sadBounce{ 0%{ transform: translateY(0);} 100%{ transform: translateY(-20px);} }
+
+/* PAGE TEMPAT MAKAN */
+#page6{ background: linear-gradient(135deg,#ffe0f0,#ffd6e8); flex-direction:column; padding:30px; }
+#page6 h2{ color:#ff4d6d; font-size:28px; text-align:center; margin-bottom:20px; }
+#page6 ul{ list-style:none; padding:0; text-align:left; }
+#page6 li{ background:white; padding:12px 20px; border-radius:15px; margin:8px 0; font-size:18px; box-shadow:0 5px 15px rgba(0,0,0,0.1); }
+#page6 li a{ text-decoration:none; color:#ff4d6d; display:block; }
+#page6 li a:hover{ background:#ffb3c6; border-radius:15px; transition:0.3s; padding-left:25px;}
+
+/* AUDIO TERSEMBUNYI */
+#audioPlayer{ display:none; }
+</style>
+</head>
+<body>
+
+<!-- AUDIO TERSEMBUNYI -->
+<audio id="birthdayAudio" src="Gellen Martadinata.MP3"></audio>
+
+<!-- PAGE 1 SURAT -->
+<div class="page active" id="page1">
+  <div class="wrapper" onclick="toggleNote()">
+    <div class="envelope">
+      <div class="flap"></div>
+      <div class="heart">💖</div>
+    </div>
+    <div class="note">
+      <h2>💌 Untuk Sayang</h2>
+      <p>
+        Selamat Hari Jadi, sayang 🎂<br>
+        Happy Birthday to my most
+
+beautiful, loving, gorgeous
+
+and caring girlfrienddd!! I
+
+lovee you soo much and FUl
+
+be supporting you from
+
+afar. I know you've haad
+
+your struggles but i know
+
+you'll be able to overcome it
+
+all! I can't imagine living
+
+without you, you were the
+
+first ever person to make
+
+me feel loved and
+
+appreciated and had never
+
+failed to put a smile on my
+
+face ever since I met you,
+
+you're the best girlfriend
+
+ever my lovee! Happy Birthday again, I love you
+soo muchh<33❤️<br>
+        I love you sooo much ❤️<br>
+        Awak adalah hadiah paling best yang saya dapat 🌸
+      </p>
+    </div>
+  </div>
+  <button class="btn-next" onclick="nextPage(2)">➡ Next</button>
+</div>
+
+<!-- PAGE 2 BALLOON -->
+<div class="page" id="page2">
+  <button class="btn-next" onclick="releaseBalloons()">🎈 Lepaskan Belon</button>
+</div>
+
+<!-- PAGE 3 CAKE -->
+<div class="page" id="page3">
+  <div class="cake-box" onclick="nextPage(4)">
+    <div class="cake">
+      <div class="cake-top">
+        <div class="drip"></div>
+        <div class="drip"></div>
+        <div class="drip"></div>
+      </div>
+      <div class="number-candle">
+        <span class="num">2</span>
+        <span class="num">2</span>
+      </div>
+    </div>
+    <div class="cake-shadow"></div>
+    <p style="color:white;font-size:20px;margin-top:10px;">🎉 Happy 22nd Birthday 🎉</p>
+    <p style="color:white;font-size:14px;">Klik kek untuk lihat galeri 🎁</p>
+  </div>
+</div>
+
+<!-- PAGE 4 GALLERY -->
+<div class="page" id="page4">
+  <h2>💖 MEMORIES 💖</h2>
+  <div class="gallery">
+    <img src="gambar1.jpeg" alt="img1" onclick="nextPage(5)">
+    <img src="gambar2.jpg" alt="img2" onclick="nextPage(5)">
+    <img src="gambar3.jpeg" alt="img3" onclick="nextPage(5)">
+    <img src="gambar4.jpeg" alt="img4" onclick="nextPage(5)">
+    <img src="gambar5.jpg" alt="img5" onclick="nextPage(5)">
+    <img src="gambar6.jpg" alt="img6" onclick="nextPage(5)">
+  </div>
+</div>
+
+<!-- PAGE 5 HADIAH -->
+<div class="page" id="page5">
+  <h2>🎁 Nak hadiah tak? 🎁</h2>
+  <div>
+    <button class="btn-gift" onclick="yesGift()">Ya</button>
+    <button class="btn-gift" onclick="noGift()">Tidak</button>
+  </div>
+  <div id="sadEmojiContainer">
+    <div id="sadEmoji">😢</div>
+    <p id="sadText">Alahhh kenapa taknak hadiahhh 😢</p>
+  </div>
+</div>
+
+<!-- PAGE 6 TEMPAT MAKAN -->
+<div class="page" id="page6">
+  <h2>🍴 Pilih Tempat Makan 🍴</h2>
+  <ul>
+    <li><a href="https://wa.me/601162061900?text=Jom%20kita%20gi%20makan%20sama%20ii%20nak%20tak%20Abiy%20%3F" target="_blank">1. Syabuyaki</a></li>
+    <li><a href="https://wa.me/601162061900?text=Jom%20kita%20gi%20makan%20sama%20ii%20nak%20tak%20Abiy%20%3F" target="_blank">2. Ayam Gepuk</a></li>
+    <li><a href="https://wa.me/601162061900?text=Jom%20kita%20gi%20makan%20sama%20ii%20nak%20tak%20Abiy%20%3F" target="_blank">3. Tahu Begedil</a></li>
+    <li><a href="https://wa.me/601162061900?text=Jom%20kita%20masak%20sendiri%20dan%20makan%20dalam%20kereta%20sama%20ii%20nak%20tak%20Abiy%20%3F" target="_blank">4. Saya masak sendiri dan makan dalam kereta 🍴</a></li>
+  </ul>
+</div>
+
+<script>
+// AUDIO SURAT
+const audio = document.getElementById("birthdayAudio");
+
+// SURAT
+function toggleNote(){
+  const wrapper = document.querySelector(".wrapper");
+  wrapper.classList.toggle("open");
+  if(wrapper.classList.contains("open")){
+    audio.play();
+  } else {
+    audio.pause();
+  }
+}
+
+function nextPage(num){
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+  document.getElementById("page"+num).classList.add("active");
+  if(num===5){ document.getElementById("sadEmojiContainer").style.display="none"; }
+}
+
+// BALLOON
+function releaseBalloons(){
+  for(let i=0;i<20;i++){ createBalloon(); }
+}
+function createBalloon(){
+  const balloon=document.createElement("div");
+  balloon.className="balloon";
+  const colors=["#ff4d6d","#ff9f1c","#2ec4b6","#a663cc","#ffccd5"];
+  balloon.style.background=colors[Math.floor(Math.random()*colors.length)];
+  balloon.style.left=Math.random()*window.innerWidth+"px";
+  balloon.style.bottom="-80px";
+  balloon.onclick=function(){ balloon.classList.add("pop"); setTimeout(()=>balloon.remove(),300); nextPage(3); }
+  document.body.appendChild(balloon);
+  setTimeout(()=>balloon.remove(),6000);
+}
+
+// HADIAH
+function yesGift(){ nextPage(6); }
+function noGift(){ document.getElementById("sadEmojiContainer").style.display="block"; }
+</script>
+
+</body>
+</html>
